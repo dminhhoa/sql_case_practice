@@ -1,8 +1,9 @@
-# sql_case_practice
+# Practicing SQL Case
 
-# Splunk Complex CASE for Bonus Tiers | prepare.sh
+## Splunk Complex CASE for Bonus Tiers | [prepare.sh](https://prepare.sh/interview/data-analysis/code/complex-case-for-bonus-tiers)
 
-Solution
+<details>
+<summary>See solution</summary>
 
 ```sql
 WITH bonus_details AS (
@@ -68,3 +69,4 @@ SELECT  name,
 FROM ranked_bonus
 ORDER BY department_name, department_rank;
 ```
+</details>
