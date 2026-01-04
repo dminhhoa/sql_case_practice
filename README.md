@@ -70,3 +70,31 @@ FROM ranked_bonus
 ORDER BY department_name, department_rank;
 ```
 </details>
+
+-----
+
+## Employee Productivity from Timesheet | [prepare.sh](https://prepare.sh/interview/data-analysis/code/employee-productivity-trend?&technology=SQL&technology=PostgreSQL&difficulty=medium)
+
+<details>
+<summary>See solution</summary>
+    
+```sql
+WITH emp_productivity AS (
+     SELECT 
+            DATE_TRUNC('month', work_date) AS month,
+            SUM(hours_worked) AS total_hours,
+            SUM(tasks_completed) AS total_tasks,
+            employee_id
+     FROM timesheets
+     GROUP BY employee_id, DATE_TRUNC('month', work_date)
+)
+SELECT
+    TO_CHAR(ep.month, 'YYYY-MM') AS month,
+    e.name,
+    ROUND(CAST(ep.total_tasks AS DECIMAL)/NULLIF(ep.total_hours,0),2) AS productivity_per_hour
+FROM emp_productivity ep
+JOIN employees e ON ep.employee_id = e.id
+ORDER BY e.name, ep.month;
+```
+
+</details>
