@@ -64,7 +64,7 @@ SELECT  name,
         CASE
             WHEN total_department_bonus <= budget THEN 'Within Budget'
             ELSE 'Over Budget'
-        END AS budget_status,
+        END AS budget_status
         
 FROM ranked_bonus
 ORDER BY department_name, department_rank;
