@@ -98,3 +98,43 @@ ORDER BY e.name, ep.month;
 ```
 
 </details>
+
+-----
+
+## Frequent Price Change Detector | [prepare.sh](https://prepare.sh/interview/data-analysis/code/frequent-price-change-detector)
+
+<details>
+<summary>See solution</summary>
+
+```sql
+WITH cte1 AS (
+    SELECT 
+        date,
+        product_id,
+        price,
+        LAG(price, 1) OVER (PARTITION BY product_id ORDER BY date ASC) AS last_price
+    FROM price_history
+),
+    cte2 AS (
+    SELECT product_id, 
+           COUNT(*)::text AS change_count
+    FROM cte1
+    WHERE price != last_price
+        AND last_price IS NOT NULL
+    GROUP BY product_id
+)
+
+
+SELECT 
+        p.category,
+        c.change_count,
+        p.name
+FROM cte2 c
+JOIN products p
+ON c.product_id = p.id
+WHERE c.change_count::int >= 2
+ORDER BY c.change_count::int DESC,
+         p.id ASC;
+```
+
+</details>
