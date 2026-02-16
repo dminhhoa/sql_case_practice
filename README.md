@@ -138,3 +138,47 @@ ORDER BY c.change_count::int DESC,
 ```
 
 </details>
+
+---
+## Wayfair YoY Growth Rate | [datalemur](https://datalemur.com/questions/yoy-growth-rate)
+
+Functions: LAG(), CASE WHEN()
+
+<details>
+<summary>See solution</summary>
+    
+```sql
+
+WITH cte1 AS(
+  SELECT *,
+  EXTRACT(YEAR FROM transaction_date) AS year
+  FROM user_transactions
+),
+cte2 AS (
+  SELECT SUM(spend) AS curr_year_spend, 
+  product_id, 
+  year
+  FROM cte1
+  GROUP BY product_id, year
+  ORDER BY product_id, year
+),
+cte3 AS (
+  SELECT product_id,
+  year,
+  curr_year_spend,
+  LAG(curr_year_spend, 1) OVER (PARTITION BY product_id ORDER BY year ASC) AS prev_year_spend
+  FROM cte2
+)
+SELECT year,
+       product_id,
+       curr_year_spend,
+       prev_year_spend,
+       CASE 
+        WHEN prev_year_spend IS NOT NULL THEN ROUND(((curr_year_spend/prev_year_spend)-1)*100,2)
+        ELSE NULL
+       END AS yoy_rate
+FROM cte3
+ORDER BY product_id, year;
+
+```
+</details>
