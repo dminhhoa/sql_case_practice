@@ -182,3 +182,68 @@ ORDER BY product_id, year;
 
 ```
 </details>
+
+---
+## Facebook Active User Retention | [datalemur](https://datalemur.com/questions/user-retention)
+
+Functions: CTE, INNER JOIN, EXTRACT
+
+<details>
+<summary>See solution</summary>
+    
+```sql
+WITH june_cte AS (
+  SELECT *
+  FROM user_actions
+  WHERE event_date >= '2022-06-01 00:00:00' 
+    AND event_date < '2022-07-01 00:00:00'
+),
+july_cte AS (
+  SELECT *
+  FROM user_actions
+  WHERE event_date >= '2022-07-01 00:00:00' 
+    AND event_date < '2022-08-01 00:00:00'
+),
+cte AS (
+  SELECT june_cte.*,
+         july_cte.event_date AS july_date
+  FROM june_cte
+  INNER JOIN july_cte
+  ON june_cte.user_id = july_cte.user_id
+)
+SELECT
+  EXTRACT(MONTH FROM july_date) AS month,
+  COUNT (DISTINCT user_id) AS monthly_active_users
+  FROM cte 
+  GROUP BY month;
+```
+</details>
+
+---
+## Stripe Repeated Payments | [datalemur](https://datalemur.com/questions/repeated-payments)
+
+Functions: LEAD, EXTRACT, EPOCH FROM
+
+<details>
+<summary>See solution</summary>
+    
+```sql
+WITH cte AS (
+SELECT *,
+      LEAD(transaction_timestamp, 1) OVER (
+      PARTITION BY merchant_id, credit_card_id, amount 
+      ORDER BY transaction_timestamp
+      ) AS next_transactions
+FROM transactions
+),
+cte2 AS (
+SELECT *,
+  EXTRACT(EPOCH FROM (next_transactions - transaction_timestamp)) / 60 AS diff
+  FROM cte 
+  WHERE next_transactions IS NOT NULL
+)
+SELECT COUNT(*)
+FROM cte2
+WHERE diff <= 10;
+```
+</details>
